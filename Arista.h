@@ -2,7 +2,7 @@
 
 template<typename T>
 
-#include Vertice.h
+#include "Vertice.h"
 class Arista {
 public:
     Arista(T *origen, T *destino){
