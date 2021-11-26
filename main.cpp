@@ -18,14 +18,13 @@ int main() {
 
     int n(0), m(0); //Numero de vertices y numero de aristas
     file >> n >> m;
-
-    std::vector<Vertice> vertices;
+    std::map<std::string, Vertice> vertices;
     std::vector<Arista<Vertice>> aristas;
 
     for(int i = 0; i < n; i++){
         Vertice v;
         file >> v;
-        vertices.push_back(std::move(v));
+        vertices[v.ip()] = v;
     }
 
     for(int i = 0; i < m; i++){
@@ -40,10 +39,8 @@ int main() {
         exitIp = getOnlyIpPart(exitIp);
 
         Vertice *originV(nullptr), *endV(nullptr);
-        for(auto &v : vertices){
-            if(v.ip() == originIp) originV = &v;
-            else if(v.ip() == exitIp) endV = &v;
-        }
+        originV = (Vertice*) &vertices[originIp];
+        endV = (Vertice*) &vertices[exitIp];
 
         aristas.emplace_back(originV, endV);
     }
@@ -55,13 +52,18 @@ int main() {
         ipOrigen->incrementExitCount();
     }
 
-    std::sort(vertices.begin(), vertices.end(), [](const Vertice &a, const Vertice &b){
+    std::vector<Vertice> verticeSorted;
+    for(const auto &v : vertices){
+        verticeSorted.emplace_back(v.second);
+    }
+
+    std::sort(verticeSorted.begin(), verticeSorted.end(), [](const Vertice &a, const Vertice &b){
         return a.getExitCount() > b.getExitCount();
     });
 
     //Prints top 10 exits
     for(int i = 0; i < 10; i++){
-        std::cout << vertices[i].ip() << " " << vertices[i].getExitCount() << std::endl;
+        std::cout << verticeSorted[i].ip() << " " << verticeSorted[i].getExitCount() << std::endl;
     }
 
     return 0;
