@@ -5,6 +5,11 @@
 template<typename T>
 class Arista {
 public:
+
+    Arista() : Arista(nullptr, nullptr){
+        ;
+    }
+
     Arista(T *origen, T *destino) {
         _origen = origen;
         _destino = destino;

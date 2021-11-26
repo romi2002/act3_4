@@ -14,20 +14,19 @@ std::string getOnlyIpPart(const std::string &ipAndPort) {
 }
 
 //Regresa las ips ordenadas por grado de salida
-std::vector<Vertice> getTopIps(const std::map<std::string, Vertice> &m){
-    std::vector<Vertice> v;
-    v.reserve(m.size());
-    //Copiar el mapa de vertices al vector temporal para poder hacer el sort
-    for(const auto &vertice : m) {
-        v.emplace_back(vertice.second);
+std::vector<std::pair<std::string, size_t>> getTopIps(const std::map<std::string, std::vector<std::string>> &listaAdj){
+    std::vector<std::pair<std::string, size_t>> topIps;
+    //Copiar al vector temporal la lista de ips y su grado de coneccion
+    for(const auto &v : listaAdj){
+        topIps.emplace_back(v.first, v.second.size());
     }
 
-    //Realizar un sort con exitCount descendiente
-    std::sort(v.begin(), v.end(), [](const Vertice &a, const Vertice &b){
-        return a.getExitCount() > b.getExitCount();
+    //Realizar un sort por su grado de coneccion
+    std::sort(topIps.begin(), topIps.end(), [](const auto &a, const auto &b){
+       return a.second > b.second;
     });
 
-    return v;
+    return topIps;
 }
 
 int main() {
@@ -35,14 +34,15 @@ int main() {
 
     size_t n(0), m(0); //Numero de vertices y numero de aristas
     file >> n >> m;
-    std::map<std::string, Vertice> vertices;
-    std::vector<Arista<Vertice>> aristas;
+    //Guarda el adjacency list representando el grafo,
+    //en formato de ip, {vertices adjacentes}
+    std::map<std::string, std::vector<std::string>> mapaAdjacencia;
 
     //Leer todos los vertices del archivo
     for(int i = 0; i < n; i++){
-        Vertice v;
-        file >> v;
-        vertices[v.ip()] = v;
+        std::string ip;
+        file >> ip;
+        mapaAdjacencia[ip] = {};
     }
 
     //Leer los aristas del archivo
@@ -59,25 +59,16 @@ int main() {
         originIp = getOnlyIpPart(originIp);
         exitIp = getOnlyIpPart(exitIp);
 
-        //Obtener los apuntadores a los vertices de inicio y fin del arista
-        auto originV = (Vertice*) &vertices[originIp];
-        auto endV = (Vertice*) &vertices[exitIp];
-
-        //Incrementar el numero de entradas y salidas para la ip
-        endV->incrementEntryCount();
-        originV->incrementExitCount();
-
-        //Agregar al vector de aristas
-        aristas.emplace_back(originV, endV);
+        mapaAdjacencia[originIp].emplace_back(exitIp);
     }
     file.close();
 
     //Obtener las ips con el mayor numero de grado de salida
-    auto topIps = getTopIps(vertices);
+    auto topIps = getTopIps(mapaAdjacencia);
 
     //Imprimir las top 10 ips
     for(int i = 0; i < 10; i++){
-        std::cout << topIps[i].ip() << " " << topIps[i].getExitCount() << std::endl;
+        std::cout << topIps[i].first << " " << topIps[i].second << std::endl;
     }
 
     return 0;

@@ -17,28 +17,8 @@ public:
         return _ipAddr;
     }
 
-    void incrementEntryCount() {
-        entryCount++;
-    }
-
-    int getEntryCount() const {
-        return entryCount;
-    }
-
-    void incrementExitCount() {
-        exitCount++;
-    }
-
-    int getExitCount() const {
-        return exitCount;
-    }
-
 private:
     std::string _ipAddr;
-
-    //Grados de salida y de entrada del vertice
-    int entryCount = 0;
-    int exitCount = 0;
 };
 
 /**
