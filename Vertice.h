@@ -17,12 +17,22 @@ public:
         return _ipAddr;
     }
 
+    void incrementExitCount() {
+        exitCount++;
+    }
+
+    int getExitCount() const {
+        return exitCount;
+    }
+
 private:
     std::string _ipAddr;
+    int exitCount = 0;
 };
 
 std::istream& operator>> (std::istream &is, Vertice &v){
     std::string ip;
     is >> ip;
     v = Vertice(ip);
+    return is;
 }

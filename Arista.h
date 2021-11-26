@@ -1,8 +1,7 @@
 #pragma once
+#include "Vertice.h"
 
 template<typename T>
-
-#include "Vertice.h"
 class Arista {
 public:
     Arista(T *origen, T *destino){
@@ -18,12 +17,12 @@ public:
     _destino = destino;
   }
 
-  T* getvInicio(){
-    return origen;
+  T* getvInicio() const {
+    return _origen;
   }
 
-  T* getvFinal(){
-    return destino;
+  T* getvFinal() const {
+    return _destino;
   }
     //TODO getters y setters
 private:
