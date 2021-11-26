@@ -13,21 +13,41 @@ std::string getOnlyIpPart(const std::string &ipAndPort) {
     return ip;
 }
 
+//Regresa las ips ordenadas por grado de salida
+std::vector<Vertice> getTopIps(const std::map<std::string, Vertice> &m){
+    std::vector<Vertice> v;
+    v.reserve(m.size());
+    //Copiar el mapa de vertices al vector temporal para poder hacer el sort
+    for(const auto &vertice : m) {
+        v.emplace_back(vertice.second);
+    }
+
+    //Realizar un sort con exitCount descendiente
+    std::sort(v.begin(), v.end(), [](const Vertice &a, const Vertice &b){
+        return a.getExitCount() > b.getExitCount();
+    });
+
+    return v;
+}
+
 int main() {
     std::ifstream file("bitacora-4_3.txt");
 
-    int n(0), m(0); //Numero de vertices y numero de aristas
+    size_t n(0), m(0); //Numero de vertices y numero de aristas
     file >> n >> m;
     std::map<std::string, Vertice> vertices;
     std::vector<Arista<Vertice>> aristas;
 
+    //Leer todos los vertices del archivo
     for(int i = 0; i < n; i++){
         Vertice v;
         file >> v;
         vertices[v.ip()] = v;
     }
 
+    //Leer los aristas del archivo
     for(int i = 0; i < m; i++){
+        //Leer ip de origen y salida, ignorar fecha y el resto de la linea
         std::string month, hour, originIp, exitIp, con;
         int day;
 
@@ -35,35 +55,29 @@ int main() {
         file >> originIp >> exitIp;
         getline(file, con);
 
+        //Obtener solamente el ip, ignorando el puerto
         originIp = getOnlyIpPart(originIp);
         exitIp = getOnlyIpPart(exitIp);
 
-        Vertice *originV(nullptr), *endV(nullptr);
-        originV = (Vertice*) &vertices[originIp];
-        endV = (Vertice*) &vertices[exitIp];
+        //Obtener los apuntadores a los vertices de inicio y fin del arista
+        auto originV = (Vertice*) &vertices[originIp];
+        auto endV = (Vertice*) &vertices[exitIp];
 
+        //Incrementar el numero de entradas y salidas para la ip
+        endV->incrementEntryCount();
+        originV->incrementExitCount();
+
+        //Agregar al vector de aristas
         aristas.emplace_back(originV, endV);
     }
-
     file.close();
 
-    for(const auto &a : aristas){
-        auto ipOrigen = a.getvInicio();
-        ipOrigen->incrementExitCount();
-    }
+    //Obtener las ips con el mayor numero de grado de salida
+    auto topIps = getTopIps(vertices);
 
-    std::vector<Vertice> verticeSorted;
-    for(const auto &v : vertices){
-        verticeSorted.emplace_back(v.second);
-    }
-
-    std::sort(verticeSorted.begin(), verticeSorted.end(), [](const Vertice &a, const Vertice &b){
-        return a.getExitCount() > b.getExitCount();
-    });
-
-    //Prints top 10 exits
+    //Imprimir las top 10 ips
     for(int i = 0; i < 10; i++){
-        std::cout << verticeSorted[i].ip() << " " << verticeSorted[i].getExitCount() << std::endl;
+        std::cout << topIps[i].ip() << " " << topIps[i].getExitCount() << std::endl;
     }
 
     return 0;

@@ -5,7 +5,7 @@
 
 class Vertice {
 public:
-    Vertice(const std::string &ip){
+    Vertice(const std::string &ip) {
         _ipAddr = ip;
     }
 
@@ -13,8 +13,16 @@ public:
         ;
     }
 
-    std::string ip() const{
+    std::string ip() const {
         return _ipAddr;
+    }
+
+    void incrementEntryCount() {
+        entryCount++;
+    }
+
+    int getEntryCount() const {
+        return entryCount;
     }
 
     void incrementExitCount() {
@@ -27,10 +35,19 @@ public:
 
 private:
     std::string _ipAddr;
+
+    //Grados de salida y de entrada del vertice
+    int entryCount = 0;
     int exitCount = 0;
 };
 
-std::istream& operator>> (std::istream &is, Vertice &v){
+/**
+ * Funcion utilizada para leer un vertice del archivo
+ * @param is
+ * @param v
+ * @return
+ */
+std::istream &operator>>(std::istream &is, Vertice &v) {
     std::string ip;
     is >> ip;
     v = Vertice(ip);
