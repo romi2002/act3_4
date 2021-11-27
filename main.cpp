@@ -36,13 +36,16 @@ int main() {
     file >> n >> m;
     //Guarda el adjacency list representando el grafo,
     //en formato de ip, {vertices adjacentes}
-    std::map<std::string, std::vector<std::string>> mapaAdjacencia;
+    std::vector<Vertice> vertices;
+    std::vector<Arista<Vertice>> aristas;
+    std::map<std::string, size_t> verticeCache; //Cache utilizado para crear los aristas
 
     //Leer todos los vertices del archivo
     for(int i = 0; i < n; i++){
-        std::string ip;
-        file >> ip;
-        mapaAdjacencia[ip] = {};
+        Vertice v;
+        file >> v;
+        verticeCache[v.ip()] = vertices.size(); //Guardar la posicion en el vector de vertices
+        vertices.emplace_back(std::move(v));
     }
 
     //Leer los aristas del archivo
@@ -59,9 +62,22 @@ int main() {
         originIp = getOnlyIpPart(originIp);
         exitIp = getOnlyIpPart(exitIp);
 
-        mapaAdjacencia[originIp].emplace_back(exitIp);
+        Vertice *verticeOrigen = &(vertices[verticeCache[originIp]]);
+        Vertice *verticeExit = &(vertices[verticeCache[exitIp]]);
+
+        aristas.emplace_back(verticeOrigen, verticeExit);
     }
     file.close();
+
+    std::map<std::string, std::vector<std::string>> mapaAdjacencia;
+    //Construir el mapa de adjacencia
+    for(const auto &a : aristas){
+        const auto originIp = a.getvInicio()->ip();
+        const auto finalIp = a.getvFinal()->ip();
+        auto entrada = mapaAdjacencia.find(originIp);
+        if(entrada == mapaAdjacencia.end()) mapaAdjacencia[originIp] = {}; //Crear el vector si no existe en el mapa
+        mapaAdjacencia[originIp].emplace_back(finalIp);
+    }
 
     //Obtener las ips con el mayor numero de grado de salida
     auto topIps = getTopIps(mapaAdjacencia);
